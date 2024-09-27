@@ -1,13 +1,12 @@
-# Importamos las bibliotecas necesarias
-from fastapi import FastAPI
-from flask import Flask, render_template
-from fastapi.middleware.wsgi import WSGIMiddleware
+from fastapi import FastAPI   #Nos permite construir apis y hacer documentación fácil
+from flask import Flask, render_template  # renderizar archivos HTML, solicitudes HTTP
+from fastapi.middleware.wsgi import WSGIMiddleware  #Permite utilizar flask sobre fastapi
 from requests import Session
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-import json
-import threading
-import time
-from typing import Dict, List, Optional
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects  #Gestionar los errores
+import json         #datos en formato JSON
+import threading    #múltiples operaciones en paralelo
+import time         #Contar segundos
+from typing import Dict, List, Optional    
 from pydantic import BaseModel
 
 # Creamos una instancia de la aplicación FastAPI
@@ -16,8 +15,8 @@ fastapi_app = FastAPI()
 # Creamos una instancia de la aplicación Flask
 flask_app = Flask(__name__)
 
-# Variable global para almacenar los datos de criptomonedas
-dataCryptos = []  # Cambiamos a una lista vacía
+# Creamos una lista para almacenar los datos de criptomonedas
+dataCryptos = []  
 
 # Modelo para representar el precio de las criptomonedas
 class USDModel(BaseModel):
@@ -26,7 +25,8 @@ class USDModel(BaseModel):
     percent_change_1h: float
     percent_change_24h: float
     market_cap: float
-    
+
+#De esta manera USD Es un diccionario y las claves son los valores en USDModel
 class QuoteModel(BaseModel):
     USD: USDModel
     
@@ -45,7 +45,7 @@ class CryptoModel(BaseModel):
     total_supply: float
     cmc_rank: int
     last_updated: str
-    quote: QuoteModel  # Contiene datos de la criptomoneda en diferentes monedas
+    quote: QuoteModel  # hacemos que quote sea un diccionario que contiene USD
 
 # Función para acceder a la API de criptomonedas
 def Acceso_API():
@@ -83,13 +83,12 @@ def get_cryptos() -> List[CryptoModel]:
     return dataCryptos  # Devolvemos los datos de criptomonedas
 
 
-
+#Definimos el endpoint /cryptos/{id} para exponer datos de API REST
 @fastapi_app.get("/cryptos/{id}", response_model=CryptoModel)
 def get_crypto(id) -> CryptoModel:    
     id = int(id)
-    for crypto in dataCryptos:
-        print(crypto)
-        if crypto['id'] == id:
+    for crypto in dataCryptos: #Ciclo itera a través de la lista de criptomonedas        
+        if crypto['id'] == id: #Comparamos el id de la criptomoneda actual con el id proporcionado en URL
             return crypto  # Devuelve la criptomoneda encontrada 
 
 
@@ -105,7 +104,7 @@ def update_data():
 
 # Iniciamos un hilo para que la función update_data corra en segundo plano
 data_thread = threading.Thread(target=update_data)
-data_thread.daemon = True  # Hacemos que el hilo se cierre al terminar la aplicación
+data_thread.daemon = True  
 data_thread.start()  # Iniciamos el hilo
 
 '''

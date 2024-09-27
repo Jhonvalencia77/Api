@@ -1,1 +1,1 @@
-web: gunicorn app:app 
+web: uvicorn app:fastapi_app 

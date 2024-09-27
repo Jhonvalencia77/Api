@@ -1,1 +1,1 @@
-web: uvicorn app:fastapi_app 
+web: uvicorn app:fastapi_app --reload

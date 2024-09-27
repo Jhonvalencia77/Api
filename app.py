@@ -20,18 +20,23 @@ flask_app = Flask(__name__)
 dataCryptos = []  # Cambiamos a una lista vacía
 
 # Modelo para representar el precio de las criptomonedas
-class QuoteModel(BaseModel):
+class USDModel(BaseModel):
     price: float
     volume_24h: float
     percent_change_1h: float
     percent_change_24h: float
     market_cap: float
+    
+class QuoteModel(BaseModel):
+    USD: USDModel
+    
 
 # Modelo para representar una criptomoneda
 class CryptoModel(BaseModel):
     id: int
     name: str
     symbol: str
+    slug: str
     num_market_pairs: int
     date_added: str
     tags: List[str]
@@ -40,18 +45,7 @@ class CryptoModel(BaseModel):
     total_supply: float
     cmc_rank: int
     last_updated: str
-    quote: Dict[str, QuoteModel]  # Contiene datos de la criptomoneda en diferentes monedas
-
-# Ruta para la página principal
-@flask_app.route('/', methods=['GET'])
-def index():
-    Acceso_API()  # Llamamos a la función para obtener los datos
-    return render_template('index.html', data=dataCryptos)  # Renderizamos la plantilla con los datos
-
-# Endpoint para obtener los datos de criptomonedas
-@fastapi_app.get("/cryptos", response_model=List[CryptoModel])
-def get_cryptos() -> List[CryptoModel]:
-    return dataCryptos  # Devolvemos los datos de criptomonedas
+    quote: QuoteModel  # Contiene datos de la criptomoneda en diferentes monedas
 
 # Función para acceder a la API de criptomonedas
 def Acceso_API():
@@ -73,10 +67,32 @@ def Acceso_API():
 
     try:
         response = session.get(url, params=parameters)  # Hacemos la solicitud a la API
-        dataCryptos = json.loads(response.text)['data']  # Guardamos solo la parte de 'data'
-        print(dataCryptos)  # Imprimimos los datos en la consola
+        dataCryptos = json.loads(response.text)['data']  # Guardamos solo la parte de 'data'        
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)  # Manejamos posibles errores
+
+# Ruta para la página principal
+@flask_app.route('/', methods=['GET'])
+def index():
+    Acceso_API()  # Llamamos a la función para obtener los datos
+    return render_template('index.html', data=dataCryptos)  # Renderizamos la plantilla con los datos
+
+# Endpoint para obtener los datos de criptomonedas
+@fastapi_app.get("/cryptos", response_model=List[CryptoModel])
+def get_cryptos() -> List[CryptoModel]:
+    return dataCryptos  # Devolvemos los datos de criptomonedas
+
+
+
+@fastapi_app.get("/cryptos/{id}", response_model=CryptoModel)
+def get_crypto(id) -> CryptoModel:    
+    id = int(id)
+    for crypto in dataCryptos:
+        print(crypto)
+        if crypto['id'] == id:
+            return crypto  # Devuelve la criptomoneda encontrada 
+
+
 
 # Montamos la aplicación Flask dentro de FastAPI
 fastapi_app.mount("/", WSGIMiddleware(flask_app))

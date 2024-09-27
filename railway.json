@@ -4,6 +4,6 @@
       "builder": "NIXPACKS"
     },
     "deploy": {
-      "startCommand": "hypercorn main:fastapi_app --bind \"[::]:$PORT\""
+      "startCommand": "hypercorn app:fastapi_app --bind \"[::]:$PORT\""
     }
 }

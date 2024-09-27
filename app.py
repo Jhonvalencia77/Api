@@ -108,7 +108,9 @@ data_thread = threading.Thread(target=update_data)
 data_thread.daemon = True  # Hacemos que el hilo se cierre al terminar la aplicación
 data_thread.start()  # Iniciamos el hilo
 
+'''
 # Ejecutamos la aplicación FastAPI
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(fastapi_app, host='0.0.0.0', port=4000, log_level="info")  # Iniciamos el servidor en el puerto 4000
+'''
